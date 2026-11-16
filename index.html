@@ -8,24 +8,42 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>
-  html, body { margin: 0; height: 100%; background: #2140ba; }
+  html, body { margin: 0; height: 100%; background: #2140ba; font-family: Arial, sans-serif; }
   iframe { position: fixed; inset: 0; width: 100%; height: 100%; border: 0; display: block; }
+  .msg { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 15px; }
   .aviso { position: fixed; right: 12px; bottom: 12px; z-index: 2; font: 600 12px/1.2 Arial, sans-serif; }
   .aviso a { color: #fff; background: rgba(33,64,186,.85); padding: 8px 12px; border-radius: 8px; text-decoration: none; display: none; }
 </style>
 </head>
 <body>
-  <iframe
-    src="https://script.google.com/macros/s/AKfycbzk_ZZGCnMDBOOh2_3h75LbuJTyL6E4aTUQrY8ipg1HzGTsRAqwScCQKAd8sbLT1K201A/exec"
-    title="Gestão de Criativos · Utilizaí"
-    allow="clipboard-read; clipboard-write"
-    referrerpolicy="no-referrer-when-downgrade"></iframe>
-  <div class="aviso"><a id="abrir" href="https://script.google.com/macros/s/AKfycbzk_ZZGCnMDBOOh2_3h75LbuJTyL6E4aTUQrY8ipg1HzGTsRAqwScCQKAd8sbLT1K201A/exec" target="_blank" rel="noopener">Não carregou? Abrir em nova aba</a></div>
+  <div class="msg" id="msg">Abrindo a Gestão de Criativos…</div>
+  <div class="aviso"><a id="abrir" target="_blank" rel="noopener">Não carregou? Abrir em nova aba</a></div>
   <script>
-    // Mostra o link alternativo só se o app demorar demais pra carregar
-    var carregou = false;
-    document.querySelector('iframe').addEventListener('load', function () { carregou = true; });
-    setTimeout(function () { if (!carregou) document.getElementById('abrir').style.display = 'inline-block'; }, 12000);
+    var APP = 'https://script.google.com/macros/s/AKfycbzk_ZZGCnMDBOOh2_3h75LbuJTyL6E4aTUQrY8ipg1HzGTsRAqwScCQKAd8sbLT1K201A/exec';
+    document.getElementById('abrir').href = APP;
+
+    // Brave e Safari bloqueiam os cookies que o Google precisa quando o app abre dentro de outra página.
+    // Nesses navegadores a página abre o app direto. Para forçar o modo "dentro da página", use ?modo=frame
+    function ehSafari() { return /^((?!chrome|android|crios|fxios|edg|opr).)*safari/i.test(navigator.userAgent); }
+    function ehBrave() {
+      try { return navigator.brave && navigator.brave.isBrave ? navigator.brave.isBrave() : Promise.resolve(false); }
+      catch (e) { return Promise.resolve(false); }
+    }
+    function abrirNaPagina() {
+      var f = document.createElement('iframe');
+      f.src = APP;
+      f.title = 'Gestão de Criativos · Utilizaí';
+      f.allow = 'clipboard-read; clipboard-write';
+      var carregou = false;
+      f.addEventListener('load', function () { carregou = true; });
+      document.body.appendChild(f);
+      setTimeout(function () { if (!carregou) document.getElementById('abrir').style.display = 'inline-block'; }, 12000);
+    }
+    var forcarFrame = /[?&]modo=frame/.test(location.search);
+    ehBrave().then(function (brave) {
+      if (!forcarFrame && (brave || ehSafari())) location.replace(APP);
+      else abrirNaPagina();
+    }, function () { abrirNaPagina(); });
   </script>
 </body>
 </html>
